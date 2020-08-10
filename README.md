@@ -1,5 +1,7 @@
 # Rethink Chat
 
+Find it running at https://rethink-chat-socketio.herokuapp.com/
+
 ## Run migrations
 
 ```
