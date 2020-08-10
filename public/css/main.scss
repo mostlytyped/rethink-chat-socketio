@@ -1,0 +1,121 @@
+@import url(//fonts.googleapis.com/css?family=Roboto:wght@300;400&display=swap);
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-size: 16px;
+    font-family: Roboto, sans;
+    background-color: #eee;
+}
+
+#app {
+    height: 100vh;
+    width: 100vw;
+}
+
+.main {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    form {
+        background-color: white;
+        height: 20em;
+        width: 40em;
+        padding: 5em;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: flex-start;
+        label {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.5em;
+        }
+        button {
+            font-size: 1.5em;
+            width: 5em;
+            margin: 0 0 0 auto;
+        }
+        input {
+            line-height: 1.5em;
+            width: 25em;
+        }
+    }
+}
+
+.chatroom {
+    display: grid;
+    height: 100%;
+    max-width: 1200px;
+    background-color: white;
+    margin: 0 auto;
+    grid-template-rows: auto 4em;
+    grid-template-areas: "chatlog"
+                         "msgform";
+    overflow: hidden;
+
+    form {
+        grid-area: msgform;
+        border-top: 1px solid black;
+        padding: 1em;
+        display: flex;
+        justify-content: space-between;
+        background-color: lightskyblue;
+        width: 100%;
+        > * {
+            margin: 0 5px;
+        }
+        input {
+            flex-grow: 1;
+            line-height: 2em;
+            padding: 0.25em;
+            border-radius: 5px;
+        }
+        button {
+            padding: 0.25em 5em;
+            font-weight: bold;
+        }
+    }
+
+    #chatlog {
+        grid-area: chatlog;
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column-reverse;
+        overflow-y: auto;
+        li {
+            padding: 5px 10px;
+            display: grid;
+            grid-template-columns: 8em 5em auto;
+            .timestamp {
+                font-style: italic;
+                color: #999;
+            }
+            .user {
+                font-weight: bold;
+            }
+            &:nth-child(odd) {
+                background-color: rgb(210, 225, 241);
+            }
+        }
+    }
+
+    #username {
+        display: block;
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 2em;
+        background: white;
+        border: 1px solid black;
+    }
+}
