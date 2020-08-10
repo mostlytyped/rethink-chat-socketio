@@ -3,7 +3,7 @@
   margin: 0;
   padding: 0;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
@@ -23,11 +23,11 @@ body {
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
 }
 
 .main form {
@@ -41,13 +41,13 @@ body {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
   -ms-flex-pack: distribute;
-      justify-content: space-around;
+  justify-content: space-around;
   -webkit-box-align: start;
-      -ms-flex-align: start;
-          align-items: flex-start;
+  -ms-flex-align: start;
+  align-items: flex-start;
 }
 
 .main form label {
@@ -56,8 +56,8 @@ body {
   display: -ms-flexbox;
   display: flex;
   -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
   font-size: 1.5em;
 }
 
@@ -80,8 +80,8 @@ body {
   background-color: white;
   margin: 0 auto;
   -ms-grid-rows: auto 4em;
-      grid-template-rows: auto 4em;
-      grid-template-areas: "chatlog" "msgform";
+  grid-template-rows: auto 4em;
+  grid-template-areas: "chatlog" "msgform";
   overflow: hidden;
 }
 
@@ -95,8 +95,8 @@ body {
   display: -ms-flexbox;
   display: flex;
   -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
   background-color: lightskyblue;
   width: 100%;
 }
@@ -107,8 +107,8 @@ body {
 
 .chatroom form input {
   -webkit-box-flex: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
   line-height: 2em;
   padding: 0.25em;
   border-radius: 5px;
@@ -131,8 +131,8 @@ body {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: reverse;
-      -ms-flex-direction: column-reverse;
-          flex-direction: column-reverse;
+  -ms-flex-direction: column-reverse;
+  flex-direction: column-reverse;
   overflow-y: auto;
 }
 
@@ -141,7 +141,7 @@ body {
   display: -ms-grid;
   display: grid;
   -ms-grid-columns: 8em 5em auto;
-      grid-template-columns: 8em 5em auto;
+  grid-template-columns: 8em 5em auto;
 }
 
 .chatroom #chatlog li .timestamp {
