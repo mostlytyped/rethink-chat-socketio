@@ -1,5 +1,8 @@
 # Rethink Chat
 
+A NodeJS+Vue chat app using RethinkDB and SocketIO.
+It features a bot for your entertainment, address it with `@lorem`.
+
 Find it running at https://rethink-chat-socketio.herokuapp.com/
 
 ## Run migrations
