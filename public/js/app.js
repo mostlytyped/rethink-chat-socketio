@@ -1,4 +1,4 @@
-// public/app.js
+// public/js/app.js
 
 // Create random username
 let username = Math.random().toString(36).substring(2, 8);
