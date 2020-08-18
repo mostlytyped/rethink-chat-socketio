@@ -1,5 +1,42 @@
+// public/app.js
+
+// Create random username
 let username = Math.random().toString(36).substring(2, 8);
 
+// Setup socket.io
+var socket = io();
+
+// Main view
+const MainView = Vue.component("main-view", {
+  data() {
+    return {
+      room: "lobby",
+      user: username,
+    };
+  },
+  methods: {
+    gotoRoom() {
+      username = this.user;
+      this.$router.push({ name: "room", params: { roomId: this.room } });
+    },
+  },
+  template: `
+<div class="main">
+    <form class="main" v-on:submit.prevent="gotoRoom">
+    <label>Username: <input v-model="user" type="text" /></label>
+    <label>Room: <input v-model="room" type="text" /></label>
+    <button>Join</button>
+    </form>
+</div>
+    `,
+});
+
+// Room view, holds a ChatRoom component
+const RoomView = Vue.component("room-view", {
+  template: `<chat-room :roomId="$route.params.roomId"/>`,
+});
+
+// ChatRoom component
 const ChatRoom = Vue.component("chat-room", {
   props: ["roomId"],
   data() {
@@ -12,11 +49,12 @@ const ChatRoom = Vue.component("chat-room", {
   },
   async created() {
     const url = new URL(
-      document.location.protocol + "//" + document.location.host + "/db/chats"
+      document.location.protocol +
+        "//" +
+        document.location.host +
+        "/chats/" +
+        this.roomId
     );
-    url.searchParams.append("orderBy", "ts");
-    url.searchParams.append("order", "desc");
-    url.searchParams.append("roomId", this.roomId);
     const chatsResp = await fetch(url);
     const { data, handle } = await chatsResp.json();
     this.chats = data;
@@ -60,43 +98,15 @@ const ChatRoom = Vue.component("chat-room", {
     `,
 });
 
-const RoomView = Vue.component("room-view", {
-  template: `<chat-room :roomId="$route.params.roomId"/>`,
-});
-
-const MainView = Vue.component("main-view", {
-  data() {
-    return {
-      room: "lobby",
-      user: username,
-    };
-  },
-  methods: {
-    gotoRoom() {
-      username = this.user;
-      this.$router.push({ name: "room", params: { roomId: this.room } });
-    },
-  },
-  template: `
-<div class="main">
-    <form class="main" v-on:submit.prevent="gotoRoom">
-    <label>Username: <input v-model="user" type="text" /></label>
-    <label>Room: <input v-model="room" type="text" /></label>
-    <button>Join</button>
-    </form>
-</div>
-    `,
-});
-
-const routes = [
-  { path: "/", component: MainView },
-  { path: "/:roomId", name: "room", component: RoomView },
-];
+// Setup routes
 const router = new VueRouter({
-  routes,
+  routes: [
+    { path: "/", component: MainView },
+    { path: "/:roomId", name: "room", component: RoomView },
+  ],
 });
 
-var socket = io();
+// Mount Vue app
 var app = new Vue({
   router,
 }).$mount("#app");

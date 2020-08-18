@@ -1,94 +1,96 @@
-var rethink = require("rethinkdb");
+// index.js
 
+// Setup express and socket.io servers
 var express = require("express");
-var morgan = require("morgan");
 const app = express();
-app.use(morgan("combined"));
-
 var http = require("http").createServer(app);
 var io = require("socket.io")(http);
 
-const rdbHost = process.env.RETHINKDB_HOST;
-const rdbPort = process.env.RETHINKDB_PORT;
-const rdbName = process.env.RETHINKDB_NAME;
-const rdbUser = process.env.RETHINKDB_USERNAME;
-const rdbPass = process.env.RETHINKDB_PASSWORD;
+// Logging middleware
+var morgan = require("morgan");
+app.use(morgan("combined"));
 
-const listenPort = process.env.PORT || "3000";
+// Serve frontend
+app.use(express.static("public"));
 
-rethink.connect(
-  {
-    host: rdbHost,
-    port: rdbPort,
-    username: rdbUser,
-    password: rdbPass,
-    db: rdbName,
-  },
-  function (err, conn) {
-    if (err) throw err;
+// Keep track of room subscriptions in RethinkDB
+const watchedRooms = {};
 
-    const watchedQueries = {};
-
-    app.use(express.static("public"));
-
-    app.get("/db/:table", (req, res) => {
-      let query = rethink.table(req.params.table);
-      let orderBy = req.query.orderBy;
-      let order = req.query.order;
-      delete req.query.orderBy;
-      delete req.query.order;
-      query = query.filter(req.query);
-      let orderedQuery = query;
-      if (orderBy) {
-        if (order === "desc") {
-          orderBy = rethink.desc(orderBy);
-        } else {
-          orderBy = rethink.asc(orderBy);
-        }
-        orderedQuery = query.orderBy(orderBy);
-      }
-      orderedQuery.run(conn, (err, cursor) => {
-        if (err) throw err;
-        cursor.toArray((err, result) => {
-          if (err) throw err;
-          res.json({
-            data: result,
-            handle: handle,
-          });
-        });
-      });
-      const handle =
-        req.params.table +
-        "/" +
-        Object.entries(req.query)
-          .map((e) => e.join("="))
-          .join("/");
-      if (!watchedQueries[handle]) {
-        query.changes().run(conn, (err, cursor) => {
-          if (err) throw err;
-          cursor.each((err, row) => {
-            if (row.new_val) {
-              io.emit(handle, row.new_val);
-            }
-          });
-        });
-        watchedQueries[handle] = true;
-      }
+// Lazy RethinkDB connection
+var r = require("rethinkdb");
+let rdbConn = null;
+const rdbConnect = async function () {
+  try {
+    const conn = await r.connect({
+      host: process.env.RETHINKDB_HOST || "localhost",
+      port: process.env.RETHINKDB_PORT || 28015,
+      username: process.env.RETHINKDB_USERNAME || "admin",
+      password: process.env.RETHINKDB_PASSWORD || "",
+      db: process.env.RETHINKDB_NAME || "test",
     });
-
-    io.on("connection", (socket) => {
-      socket.on("chats", (msg) => {
-        rethink
-          .table("chats")
-          .insert(Object.assign(msg, { ts: Date.now() }))
-          .run(conn, function (err, res) {
-            if (err) throw err;
-          });
-      });
-    });
-
-    http.listen(listenPort, () => {
-      console.log("listening on *:" + listenPort);
-    });
+    console.log("Connected to RethinkDB");
+    rdbConn = conn;
+    return conn;
+  } catch (err) {
+    throw err;
   }
-);
+};
+const getRethinkDB = async function () {
+  if (rdbConn != null) {
+    return rdbConn;
+  }
+  return await rdbConnect();
+};
+
+// Route to access a room
+app.get("/chats/:room", async (req, res) => {
+  const conn = await getRethinkDB();
+
+  const room = req.params.room;
+  let query = r.table("chats").filter({ roomId: room });
+
+  // Subscribe to new messages
+  if (!watchedRooms[room]) {
+    query.changes().run(conn, (err, cursor) => {
+      if (err) throw err;
+      cursor.each((err, row) => {
+        if (row.new_val) {
+          // Got a new message, send it via socket.io
+          io.emit(room, row.new_val);
+        }
+      });
+    });
+    watchedRooms[room] = true;
+  }
+
+  // Return message history & socket.io handle to get new messages
+  let orderedQuery = query.orderBy(r.desc("ts"));
+  orderedQuery.run(conn, (err, cursor) => {
+    if (err) throw err;
+    cursor.toArray((err, result) => {
+      if (err) throw err;
+      res.json({
+        data: result,
+        handle: room,
+      });
+    });
+  });
+});
+
+// Socket.io (listen for new messages in any room)
+io.on("connection", (socket) => {
+  socket.on("chats", async (msg) => {
+    const conn = await getRethinkDB();
+    r.table("chats")
+      .insert(Object.assign(msg, { ts: Date.now() }))
+      .run(conn, function (err, res) {
+        if (err) throw err;
+      });
+  });
+});
+
+// HTTP server (start listening)
+const listenPort = process.env.PORT || "3000";
+http.listen(listenPort, () => {
+  console.log("listening on *:" + listenPort);
+});
