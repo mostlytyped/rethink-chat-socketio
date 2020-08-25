@@ -28,6 +28,13 @@ const rdbConnect = async function () {
       password: process.env.RETHINKDB_PASSWORD || "",
       db: process.env.RETHINKDB_NAME || "test",
     });
+
+    // Handle close
+    conn.on("close", function (e) {
+      console.log("RDB connection closed: ", e);
+      rdbConn = null;
+    });
+
     console.log("Connected to RethinkDB");
     rdbConn = conn;
     return conn;
